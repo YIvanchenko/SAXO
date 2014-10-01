@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Persistence.Services.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,8 +9,15 @@ namespace BookLists.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        private readonly IBookListsDataService _bookListsDataService;
+
+        public HomeController(IBookListsDataService bookListsDataService)
         {
+            _bookListsDataService = bookListsDataService;
+        }
+
+        public ActionResult Index()
+        {            
             return View();
         }
 
