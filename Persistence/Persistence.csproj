@@ -49,6 +49,7 @@
     <Compile Include="Context\SAXODbContext.cs" />
     <Compile Include="Entities\BookEntity.cs" />
     <Compile Include="Entities\BookListEntity.cs" />
+    <Compile Include="Exceptions\BookListException.cs" />
     <Compile Include="Initializer\SAXODbInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BookListsDataService.cs" />
