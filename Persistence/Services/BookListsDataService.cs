@@ -1,10 +1,10 @@
-﻿using Persistence.Services.Interface;
-using Persistence.Context;
+﻿using Persistence.Context;
 using Persistence.Entities;
-using System.Collections.Generic;
-using System.Linq;
 using Persistence.Exceptions;
+using Persistence.Services.Interface;
+using System.Collections.Generic;
 using System.Data.Entity;
+using System.Linq;
 
 namespace Persistence.Services
 {
@@ -14,7 +14,7 @@ namespace Persistence.Services
         {
             using (var context = new SAXODbContext())
             {
-                return (from list in context.BookListEntities
+                return (from list in context.BookListEntities.Include(bookList => bookList.Books)
                         select list).ToList();
             }
         }
@@ -23,9 +23,9 @@ namespace Persistence.Services
         {
             using (var context = new SAXODbContext())
             {
-                return (from list in context.BookListEntities
+                return (from list in context.BookListEntities.Include(bookList => bookList.Books)
                         where list.Id == id
-                        select list).Single();
+                        select list).SingleOrDefault();
             }
         }
 
@@ -42,11 +42,50 @@ namespace Persistence.Services
             }
         }
 
-        public BookListEntity Create()
+        public void Add(BookListEntity bookList)
         {
             using (var context = new SAXODbContext())
             {
-                return context.BookListEntities.Create();
+                context.BookListEntities.Add(bookList);
+                if (!(context.SaveChanges() > 0))
+                {
+                    throw new BookListException();
+                }
+            }
+        }
+
+        public BookEntity GetById(string isbn)
+        {
+            using (var context = new SAXODbContext())
+            {
+                return (from book in context.BookEntities
+                        where book.ISBN == isbn
+                        select book).SingleOrDefault();
+            }
+        }
+
+        public void SaveBook(BookEntity book)
+        {
+            using (var context = new SAXODbContext())
+            {
+                context.BookEntities.Attach(book);
+                context.Entry(book).State = EntityState.Modified;
+                if (!(context.SaveChanges() > 0))
+                {
+                    throw new BookListException();
+                }
+            }
+        }
+
+        public void AddBook(BookEntity book)
+        {
+            using (var context = new SAXODbContext())
+            {
+                context.BookEntities.Add(book);
+                if (!(context.SaveChanges() > 0))
+                {
+                    throw new BookListException();
+                }
             }
         }
     }

@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "Upload";
+}
+
+<h2>@ViewBag.Title.</h2>
+<h3>@ViewBag.Message</h3>
+
+<form name="uploadform" method="post" enctype="multipart/form-data" action="~/api/booklist">
+    <div>
+        <label for="file">CSV File</label>
+        <input name="file" type="file" />
+    </div>
+    <div>
+        <input type="submit" value="Submit" />
+    </div>
+</form>

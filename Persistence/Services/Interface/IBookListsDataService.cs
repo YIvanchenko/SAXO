@@ -11,6 +11,12 @@ namespace Persistence.Services.Interface
 
         void Save(BookListEntity bookList);
 
-        BookListEntity Create();
+        void Add(BookListEntity bookList);
+
+        BookEntity GetById(string isbn);
+
+        void SaveBook(BookEntity book);
+
+        void AddBook(BookEntity book);
     }
 }

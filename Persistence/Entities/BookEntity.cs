@@ -5,10 +5,8 @@
         public string ISBN { get; set; }
                 
         public virtual int BookListId { get; set; }
-        
-        public virtual BookListEntity BookList { get; set; }
-        
-        public int SAXOId { get; set; }
+       
+        public int SaxoId { get; set; }
 
         public string Title { get; set; }
 
