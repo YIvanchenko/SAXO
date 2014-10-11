@@ -15,6 +15,8 @@ namespace Services.Interface
 
         Book GetBookById(string isbn);
 
+        IEnumerable<BookList> GetListBySpecification(string bookTitle);
+
         void ProcessBookLists(IEnumerable<Tuple<int, string>> bookListsLines);
 
         void ProcessBooks(IEnumerable<Tuple<string, int>> bookLines);

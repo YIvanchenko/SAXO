@@ -1,4 +1,5 @@
-﻿using Services.Interface;
+﻿using Services;
+using Services.Interface;
 using Services.Models;
 using System;
 using System.Collections.Generic;
@@ -19,21 +20,33 @@ namespace BookLists.Controllers
             _bookListsService = bookListsService;
         }
 
-        // GET: api/BookList
         public IEnumerable<BookList> Get()
         {
             return _bookListsService.GetAllBookLists();
         }
 
-        // GET: api/BookList/5
+        [Route("api/booklist/GetListById/{id}")]
+        [HttpGet]
         public BookList Get(int id)
         {
             return _bookListsService.GetBookListById(id);
         }
 
-        // PUT: api/BookList/5
-        public void Put(int id, [FromBody]string value)
+        [Route("api/booklist/GetListBySpecification/{bookTitle}")]
+        [HttpGet]
+        public IEnumerable<BookList> GetListBySpecification(string bookTitle)
+        {            
+            return _bookListsService.GetListBySpecification(bookTitle);
+        }
+
+        [Route("api/booklist/Create")]
+        [HttpPost]
+        public void Create(string isbn, int listId)
         {
+            _bookListsService.ProcessBooks(new List<Tuple<string, int>>() 
+            { 
+                new Tuple<string, int>(isbn, listId) 
+            });
         }
 
         public async Task<HttpResponseMessage> PostFormData()

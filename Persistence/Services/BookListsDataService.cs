@@ -2,9 +2,11 @@
 using Persistence.Entities;
 using Persistence.Exceptions;
 using Persistence.Services.Interface;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Persistence.Services
 {
@@ -16,6 +18,14 @@ namespace Persistence.Services
             {
                 return (from list in context.BookListEntities.Include(bookList => bookList.Books)
                         select list).ToList();
+            }
+        }
+
+        public IEnumerable<BookListEntity> GetSpecific(Expression<Func<BookListEntity, bool>> condition)
+        {
+            using (var context = new SAXODbContext())
+            {
+                return context.BookListEntities.Include(bookList => bookList.Books).Where(condition).ToList();
             }
         }
 

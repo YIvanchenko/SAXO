@@ -19,9 +19,12 @@
             <h2 data-bind="text: Title"></h2>
             <!-- ko foreach: Books -->
             <div style="display: inline-block;padding-top: 10px;" class="col-md-2">
-                <div style="padding: 5px;background-color: rgb(152, 173, 226);">
-                    <h4 data-bind="text: $data.ISBN"></h4>
-                    <p>The advantage of projection is you get only the data you need.</p>
+                <div style="padding: 5px;height:410px;">
+                    <h4 data-bind="text: $data.SaxoId"></h4>
+                    <p data-bind="text: 'ISBN:' + $data.ISBN"></p>
+                    <img data-bind="attr: { 'src': $data.ImageURL }" alt="Front cover" style="width: 100%;">                    
+                    <p data-bind='text: $data.Title'></p>
+                    <p data-bind="text: $data.Price"></p>
                 </div>
             </div>
             <!-- /ko -->

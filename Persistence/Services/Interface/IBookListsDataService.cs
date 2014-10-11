@@ -1,5 +1,7 @@
 ﻿using Persistence.Entities;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Persistence.Services.Interface
 {
@@ -8,6 +10,8 @@ namespace Persistence.Services.Interface
         IEnumerable<BookListEntity> GetAll();
 
         BookListEntity GetById(int id);
+
+        IEnumerable<BookListEntity> GetSpecific(Expression<Func<BookListEntity, bool>> condition);
 
         void Save(BookListEntity bookList);
 

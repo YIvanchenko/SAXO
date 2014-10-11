@@ -5,11 +5,19 @@ using Services.Interface;
 using Services.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Linq;
+using System.Text;
+using System.Web.Script.Serialization;
 
 namespace Services
 {
     public class BookListsService : IBookListsService
     {
+        private const string BOOK_DETAILS_API_URL_FORMAT = @"http://api.saxo.com/v1/Products/Products.json?key=563c52b3177047978c0bdfbfd776ebd3&ISBN={0}";
+        private const string BOOK_PRICE_API_URL_FORMAT = @"http://api.saxo.com/v1/Prices/Prices.json?key=563c52b3177047978c0bdfbfd776ebd3&ProductID={0}";
+
         private readonly IBookListsDataService _bookListsDataService;
 
         public BookListsService(IBookListsDataService bookListsDataService)
@@ -20,6 +28,13 @@ namespace Services
         public IEnumerable<BookList> GetAllBookLists()
         {
             var bookListEntities = _bookListsDataService.GetAll();
+            return Mapper.Map<IEnumerable<BookListEntity>, IEnumerable<BookList>>(bookListEntities);
+        }
+
+        public IEnumerable<BookList> GetListBySpecification(string bookTile)
+        {
+            var bookListEntities = _bookListsDataService.GetSpecific(
+                bookList => bookList.Books.Any(book => book.Title.ToLower().Contains(bookTile.ToLower())));
             return Mapper.Map<IEnumerable<BookListEntity>, IEnumerable<BookList>>(bookListEntities);
         }
 
@@ -71,47 +86,61 @@ namespace Services
                         BookListId = values.Item2
                     };
 
+                    FillBookData(book);
                     _bookListsDataService.AddBook(book);
+                }
+                else
+                {
+                    FillBookData(book);
+                    _bookListsDataService.SaveBook(book);
                 }
             }
         }
 
-        //public void ProcessFileData(IEnumerable<string[]> lines)
-        //{
-        //    foreach (var values in lines)
-        //    {
-        //        var bookListId = Convert.ToInt32(values[1]);
+        private void FillBookData(BookEntity book)
+        {
+            var bookJsonData = JsonRequest(string.Format(BOOK_DETAILS_API_URL_FORMAT, book.ISBN));
+            if (bookJsonData.Any(p => p.Key == "id"))
+            {
+                book.SaxoId = Convert.ToInt32(bookJsonData["id"]);
+            }
 
-        //        var bookList = _bookListsDataService.GetById(bookListId);
-        //        if (bookList == null)
-        //        {
-        //            bookList = new BookListEntity()
-        //            {
-        //                Id = bookListId,
-        //                Title = values[3]
-        //            };
+            if (bookJsonData.Any(p => p.Key == "title"))
+            {
+                book.Title = Convert.ToString(bookJsonData["title"]);
+            }
 
-        //            _bookListsDataService.Add(bookList);
-        //        }
-        //        else
-        //        {
-        //            bookList.Title = values[3];
-        //            _bookListsDataService.Save(bookList);
-        //        }
+            if (bookJsonData.Any(p => p.Key == "imageurl"))
+            {
+                book.ImageURL = Convert.ToString(bookJsonData["imageurl"]);
+            }
 
-        //        var isbn = values[0];
-        //        var book = _bookListsDataService.GetById(isbn);
-        //        if (book == null)
-        //        {
-        //            book = new BookEntity()
-        //            {
-        //                ISBN = isbn,
-        //                BookListId = bookListId
-        //            };
+            var bookpriceJsonData = JsonRequest(string.Format(BOOK_PRICE_API_URL_FORMAT, book.SaxoId));
+            if (bookJsonData.Any(p => p.Key == "price"))
+            {
+                book.ImageURL = Convert.ToString(bookJsonData["price"]);
+            }
+        }
 
-        //            _bookListsDataService.AddBook(book);
-        //        }
-        //    }
-        //}
+        private Dictionary<string, object> JsonRequest(string url)
+        {
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            try
+            {
+                WebResponse response = request.GetResponse();
+                using (Stream responseStream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(responseStream, Encoding.UTF8))
+                {
+                    var js = new JavaScriptSerializer();
+                    var jsonDictionary = js.DeserializeObject(reader.ReadToEnd()) as Dictionary<string, object>;
+                    return (jsonDictionary.Values.First() as object[]).First() as Dictionary<string, object>;
+                }
+            }
+            catch (WebException)
+            {
+                // Log error here in case you found that reasonable.
+                return new Dictionary<string, object>();
+            }
+        }
     }
 }
